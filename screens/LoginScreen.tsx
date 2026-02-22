@@ -7,6 +7,15 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
+
+    async function handleAuth() {
+        if (isRegistering) {
+            await signUpWithEmail();
+        } else {
+            await signInWithEmail();
+        }
+    }
 
     async function signInWithEmail() {
         setLoading(true);
@@ -17,6 +26,26 @@ export default function LoginScreen() {
 
         if (error) {
             Alert.alert('Login Failed', error.message);
+        }
+        setLoading(false);
+    }
+
+    async function signUpWithEmail() {
+        if (!email || !password) {
+            Alert.alert('Error', 'Please enter email and password');
+            return;
+        }
+        setLoading(true);
+        const { error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            Alert.alert('Registration Failed', error.message);
+        } else {
+            Alert.alert('Success', 'Business registered! Please login now.');
+            setIsRegistering(false);
         }
         setLoading(false);
     }
@@ -32,7 +61,9 @@ export default function LoginScreen() {
                         <Ionicons name="calendar" size={60} color="#fff" />
                     </View>
                     <Text style={styles.title}>Hajiri Admin</Text>
-                    <Text style={styles.subtitle}>SME Staff Management System</Text>
+                    <Text style={styles.subtitle}>
+                        {isRegistering ? 'Register Your Business' : 'SME Staff Management System'}
+                    </Text>
                 </View>
 
                 <View style={styles.form}>
@@ -62,21 +93,29 @@ export default function LoginScreen() {
 
                     <TouchableOpacity
                         style={[styles.loginBtn, loading && styles.disabledBtn]}
-                        onPress={signInWithEmail}
+                        onPress={handleAuth}
                         disabled={loading}
                     >
-                        <Text style={styles.loginBtnText}>{loading ? 'Authenticating...' : 'Login'}</Text>
+                        <Text style={styles.loginBtnText}>
+                            {loading ? 'Processing...' : (isRegistering ? 'Sign Up' : 'Login')}
+                        </Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.forgotBtn}>
-                        <Text style={styles.forgotText}>Forgot Password?</Text>
-                    </TouchableOpacity>
+                    {!isRegistering && (
+                        <TouchableOpacity style={styles.forgotBtn}>
+                            <Text style={styles.forgotText}>Forgot Password?</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Don't have an account?</Text>
-                    <TouchableOpacity>
-                        <Text style={styles.registerText}> Register your Business</Text>
+                    <Text style={styles.footerText}>
+                        {isRegistering ? 'Already have an account?' : "Don't have an account?"}
+                    </Text>
+                    <TouchableOpacity onPress={() => setIsRegistering(!isRegistering)}>
+                        <Text style={styles.registerText}>
+                            {isRegistering ? ' Back to Login' : ' Register your Business'}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
