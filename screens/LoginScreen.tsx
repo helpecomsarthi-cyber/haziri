@@ -8,8 +8,10 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [isRegistering, setIsRegistering] = useState(false);
+    const [status, setStatus] = useState<{ msg: string, type: 'error' | 'success' } | null>(null);
 
     async function handleAuth() {
+        setStatus(null);
         if (isRegistering) {
             await signUpWithEmail();
         } else {
@@ -18,36 +20,47 @@ export default function LoginScreen() {
     }
 
     async function signInWithEmail() {
-        setLoading(true);
-        const { error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
-
-        if (error) {
-            Alert.alert('Login Failed', error.message);
+        if (!email || !password) {
+            setStatus({ msg: 'Please enter email and password', type: 'error' });
+            return;
         }
-        setLoading(false);
+        setLoading(true);
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+            if (error) throw error;
+        } catch (error: any) {
+            setStatus({ msg: error.message || 'Login Failed', type: 'error' });
+            if (Platform.OS !== 'web') Alert.alert('Login Failed', error.message);
+        } finally {
+            setLoading(false);
+        }
     }
 
     async function signUpWithEmail() {
         if (!email || !password) {
-            Alert.alert('Error', 'Please enter email and password');
+            setStatus({ msg: 'Please enter email and password', type: 'error' });
             return;
         }
         setLoading(true);
-        const { error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-        });
+        try {
+            const { error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+            });
 
-        if (error) {
-            Alert.alert('Registration Failed', error.message);
-        } else {
-            Alert.alert('Success', 'Business registered! Please login now.');
+            if (error) throw error;
+
+            setStatus({ msg: 'Registration Successful! Please login.', type: 'success' });
             setIsRegistering(false);
+        } catch (error: any) {
+            setStatus({ msg: error.message || 'Registration Failed', type: 'error' });
+            if (Platform.OS !== 'web') Alert.alert('Registration Failed', error.message);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     return (
@@ -67,6 +80,12 @@ export default function LoginScreen() {
                 </View>
 
                 <View style={styles.form}>
+                    {status && (
+                        <View style={[styles.statusBox, status.type === 'error' ? styles.errorBox : styles.successBox]}>
+                            <Text style={styles.statusTextContent}>{status.msg}</Text>
+                        </View>
+                    )}
+
                     <View style={styles.inputContainer}>
                         <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
                         <TextInput
@@ -85,7 +104,7 @@ export default function LoginScreen() {
                             style={styles.input}
                             placeholder="Password"
                             value={password}
-                            onChangeText={password => setPassword(password)}
+                            onChangeText={setPassword}
                             secureTextEntry
                             autoCapitalize="none"
                         />
@@ -112,7 +131,7 @@ export default function LoginScreen() {
                     <Text style={styles.footerText}>
                         {isRegistering ? 'Already have an account?' : "Don't have an account?"}
                     </Text>
-                    <TouchableOpacity onPress={() => setIsRegistering(!isRegistering)}>
+                    <TouchableOpacity onPress={() => { setStatus(null); setIsRegistering(!isRegistering); }}>
                         <Text style={styles.registerText}>
                             {isRegistering ? ' Back to Login' : ' Register your Business'}
                         </Text>
@@ -224,5 +243,25 @@ const styles = StyleSheet.create({
     registerText: {
         color: '#25D366',
         fontWeight: 'bold',
+    },
+    statusBox: {
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 15,
+    },
+    errorBox: {
+        backgroundColor: '#FFEBEE',
+        borderWidth: 1,
+        borderColor: '#EF9A9A',
+    },
+    successBox: {
+        backgroundColor: '#E8F5E9',
+        borderWidth: 1,
+        borderColor: '#A5D6A7',
+    },
+    statusTextContent: {
+        fontSize: 14,
+        textAlign: 'center',
+        color: '#333',
     }
 });
