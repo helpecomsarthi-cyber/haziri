@@ -51,7 +51,7 @@ export default function EmployeesScreen() {
         name: newName,
         phone: newPhone,
         role: newRole,
-        dailyWage: parseFloat(newWage),
+        daily_wage: parseFloat(newWage),
         status: 'Active'
       });
 
@@ -95,7 +95,7 @@ export default function EmployeesScreen() {
         </View>
         <View style={styles.infoRow}>
           <Ionicons name="cash-outline" size={16} color="#666" />
-          <Text style={styles.infoText}>₹{item.dailyWage} / day</Text>
+          <Text style={styles.infoText}>₹{item.daily_wage} / day</Text>
         </View>
       </View>
 
