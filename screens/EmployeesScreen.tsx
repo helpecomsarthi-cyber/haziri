@@ -10,6 +10,7 @@ export default function EmployeesScreen() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
   // New Employee Form State
   const [newName, setNewName] = useState('');
@@ -34,39 +35,53 @@ export default function EmployeesScreen() {
     setLoading(false);
   };
 
-  const handleAddEmployee = async () => {
-    console.log('Attempting to add employee:', { newName, newPhone, newRole, newWage });
+  const handleEditPress = (employee: Employee) => {
+    setEditingEmployee(employee);
+    setNewName(employee.name);
+    setNewPhone(employee.phone);
+    setNewRole(employee.role);
+    setNewWage(employee.daily_wage.toString());
+    setModalVisible(true);
+  };
 
+  const resetForm = () => {
+    setEditingEmployee(null);
+    setNewName('');
+    setNewPhone('');
+    setNewRole('Staff');
+    setNewWage('');
+  };
+
+  const handleSubmit = async () => {
     if (!newName || !newPhone || !newWage) {
-      console.warn('Validation failed: Some fields are empty');
       Alert.alert('Error', 'Please fill all fields');
       return;
     }
 
     try {
       setLoading(true);
-      console.log('Calling employeeService.addEmployee...');
-
-      const result = await employeeService.addEmployee({
+      const employeeData = {
         name: newName,
         phone: newPhone,
         role: newRole,
         daily_wage: parseFloat(newWage),
-        status: 'Active'
-      });
+        status: editingEmployee ? editingEmployee.status : 'Active'
+      };
 
-      console.log('Employee added successfully:', result);
+      if (editingEmployee) {
+        await employeeService.updateEmployee(editingEmployee.id, employeeData);
+        Alert.alert('Success', 'Staff details updated!');
+      } else {
+        await employeeService.addEmployee(employeeData);
+        Alert.alert('Success', 'Staff added successfully!');
+      }
 
       setModalVisible(false);
-      setNewName('');
-      setNewPhone('');
-      setNewWage('');
-
-      Alert.alert('Success', 'Staff added successfully!');
+      resetForm();
       loadEmployees();
     } catch (error: any) {
-      console.error('Failed to add employee:', error);
-      Alert.alert('Error', error.message || 'Could not add staff');
+      Alert.alert('Error', error.message || 'Action failed');
+    } finally {
       setLoading(false);
     }
   };
@@ -102,7 +117,7 @@ export default function EmployeesScreen() {
       <View style={styles.cardFooter}>
         <TouchableOpacity
           style={styles.actionBtn}
-          onPress={() => Alert.alert('Edit Staff', `Editing functionality for ${item.name} is coming in the next update!`)}
+          onPress={() => handleEditPress(item)}
         >
           <Ionicons name="create-outline" size={18} color="#075E54" />
           <Text style={styles.actionText}>Edit</Text>
@@ -130,7 +145,7 @@ export default function EmployeesScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <Text style={styles.searchText}>Search staff...</Text>
         </View>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity style={styles.addBtn} onPress={() => { resetForm(); setModalVisible(true); }}>
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -160,8 +175,8 @@ export default function EmployeesScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add New Staff</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.modalTitle}>{editingEmployee ? 'Edit Staff' : 'Add New Staff'}</Text>
+              <TouchableOpacity onPress={() => { setModalVisible(false); resetForm(); }}>
                 <Ionicons name="close" size={24} color="#666" />
               </TouchableOpacity>
             </View>
@@ -218,11 +233,11 @@ export default function EmployeesScreen() {
 
               <TouchableOpacity
                 style={[styles.submitBtn, loading && styles.disabledBtn]}
-                onPress={handleAddEmployee}
+                onPress={handleSubmit}
                 disabled={loading}
               >
                 <Text style={styles.submitBtnText}>
-                  {loading ? 'Adding...' : 'Add Employee'}
+                  {loading ? 'Processing...' : (editingEmployee ? 'Update Details' : 'Add Employee')}
                 </Text>
               </TouchableOpacity>
             </ScrollView>
