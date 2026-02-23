@@ -4,10 +4,10 @@ import * as Location from 'expo-location';
 
 export interface Attendance {
     id: string;
-    employeeId: string;
+    employee_id: string;
     date: string;
-    inTime: string;
-    outTime: string;
+    in_time: string;
+    out_time: string;
     status: string;
     location: string;
     latitude?: number;
@@ -46,9 +46,9 @@ export const attendanceService = {
         }
 
         const newRecord = {
-            employeeId,
+            employee_id: employeeId,
             date: new Date().toISOString().split('T')[0],
-            inTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            in_time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             status: 'Present',
             location: locationName,
             ...gpsData

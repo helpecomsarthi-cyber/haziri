@@ -6,7 +6,7 @@ export interface Employee {
     name: string;
     phone: string;
     role: string;
-    dailyWage: number;
+    daily_wage: number;
     status: string;
     org_id?: string;
 }

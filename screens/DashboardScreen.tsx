@@ -90,7 +90,7 @@ export default function DashboardScreen() {
         </View>
 
         {attendance.slice(0, 3).map((record, index) => {
-          const emp = employees.find(e => e.id === record.employeeId);
+          const emp = employees.find(e => e.id === record.employee_id);
           return (
             <View key={index} style={styles.punchCard}>
               <View style={styles.punchInfo}>
@@ -100,7 +100,7 @@ export default function DashboardScreen() {
                 <View>
                   <Text style={styles.empName}>{emp?.name}</Text>
                   <Text style={styles.punchTime}>
-                    <Ionicons name="logo-whatsapp" size={12} color="#25D366" /> IN: {record.inTime} | Loc: {record.location}
+                    <Ionicons name="logo-whatsapp" size={12} color="#25D366" /> IN: {record.in_time} | Loc: {record.location}
                   </Text>
                 </View>
               </View>

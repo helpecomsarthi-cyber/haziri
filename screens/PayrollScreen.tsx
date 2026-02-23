@@ -20,30 +20,30 @@ export default function PayrollScreen() {
     setLoading(false);
   };
 
-  const totalPayroll = payroll.reduce((sum, item) => sum + item.totalSalary, 0);
+  const totalPayroll = payroll.reduce((sum, item) => sum + item.total_salary, 0);
 
   const renderItem = ({ item }: { item: Payroll }) => {
-    const emp = mockEmployees.find(e => e.id === item.employeeId);
+    const emp = mockEmployees.find(e => e.id === item.employee_id);
 
     return (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.empName}>{emp?.name}</Text>
-          <Text style={styles.salaryAmount}>₹{item.totalSalary.toLocaleString()}</Text>
+          <Text style={styles.salaryAmount}>₹{item.total_salary.toLocaleString()}</Text>
         </View>
 
         <View style={styles.statsRow}>
           <View style={styles.stat}>
             <Text style={styles.statLabel}>Present</Text>
-            <Text style={[styles.statValue, { color: '#2E7D32' }]}>{item.presentDays}d</Text>
+            <Text style={[styles.statValue, { color: '#2E7D32' }]}>{item.present_days}d</Text>
           </View>
           <View style={styles.stat}>
             <Text style={styles.statLabel}>Absent</Text>
-            <Text style={[styles.statValue, { color: '#C62828' }]}>{item.absentDays}d</Text>
+            <Text style={[styles.statValue, { color: '#C62828' }]}>{item.absent_days}d</Text>
           </View>
           <View style={styles.stat}>
             <Text style={styles.statLabel}>Late</Text>
-            <Text style={[styles.statValue, { color: '#EF6C00' }]}>{item.lateDays}d</Text>
+            <Text style={[styles.statValue, { color: '#EF6C00' }]}>{item.late_days}d</Text>
           </View>
         </View>
 

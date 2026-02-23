@@ -12,7 +12,7 @@ CREATE TABLE employees (
     name TEXT NOT NULL,
     phone TEXT NOT NULL,
     role TEXT NOT NULL,
-    dailyWage NUMERIC NOT NULL DEFAULT 0,
+    daily_wage NUMERIC NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'Active',
     org_id UUID DEFAULT auth.uid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -21,10 +21,10 @@ CREATE TABLE employees (
 -- 2. Attendance Table
 CREATE TABLE attendance (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    employeeId UUID REFERENCES employees(id) ON DELETE CASCADE,
+    employee_id UUID REFERENCES employees(id) ON DELETE CASCADE,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
-    inTime TEXT,
-    outTime TEXT,
+    in_time TEXT,
+    out_time TEXT,
     status TEXT NOT NULL DEFAULT 'Present', -- Present, Absent, Late, Working
     location TEXT,
     latitude DOUBLE PRECISION,
@@ -35,12 +35,12 @@ CREATE TABLE attendance (
 -- 3. Payroll Table
 CREATE TABLE payroll (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    employeeId UUID REFERENCES employees(id) ON DELETE CASCADE,
+    employee_id UUID REFERENCES employees(id) ON DELETE CASCADE,
     month TEXT NOT NULL, -- e.g., 'October 2023'
-    presentDays INTEGER DEFAULT 0,
-    absentDays INTEGER DEFAULT 0,
-    lateDays INTEGER DEFAULT 0,
-    totalSalary NUMERIC DEFAULT 0,
+    present_days INTEGER DEFAULT 0,
+    absent_days INTEGER DEFAULT 0,
+    late_days INTEGER DEFAULT 0,
+    total_salary NUMERIC DEFAULT 0,
     status TEXT DEFAULT 'Pending', -- Paid, Pending
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -68,7 +68,7 @@ CREATE POLICY "Users can view their own org attendance"
 ON attendance FOR SELECT 
 USING (EXISTS (
     SELECT 1 FROM employees 
-    WHERE employees.id = attendance.employeeId 
+    WHERE employees.id = attendance.employee_id 
     AND employees.org_id = auth.uid()
 ));
 
@@ -76,7 +76,7 @@ CREATE POLICY "Users can insert attendance for their own org"
 ON attendance FOR INSERT 
 WITH CHECK (EXISTS (
     SELECT 1 FROM employees 
-    WHERE employees.id = attendance.employeeId 
+    WHERE employees.id = attendance.employee_id 
     AND employees.org_id = auth.uid()
 ));
 
@@ -85,6 +85,6 @@ CREATE POLICY "Users can view their own org payroll"
 ON payroll FOR SELECT 
 USING (EXISTS (
     SELECT 1 FROM employees 
-    WHERE employees.id = payroll.employeeId 
+    WHERE employees.id = payroll.employee_id 
     AND employees.org_id = auth.uid()
 ));

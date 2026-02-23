@@ -31,7 +31,7 @@ export default function AttendanceScreen() {
   });
 
   const renderItem = ({ item }: { item: Attendance }) => {
-    const emp = mockEmployees.find(e => e.id === item.employeeId);
+    const emp = mockEmployees.find(e => e.id === item.employee_id);
 
     return (
       <View style={styles.card}>
@@ -48,8 +48,8 @@ export default function AttendanceScreen() {
         <View style={styles.timeContainer}>
           <View style={styles.timeBox}>
             <Text style={styles.timeLabel}>PUNCH IN</Text>
-            <Text style={styles.timeValue}>{item.inTime}</Text>
-            {item.inTime !== '-' && (
+            <Text style={styles.timeValue}>{item.in_time}</Text>
+            {item.in_time !== '-' && (
               <Text style={styles.locationText}>
                 <Ionicons name="location" size={10} /> {item.location}
               </Text>
@@ -58,8 +58,8 @@ export default function AttendanceScreen() {
           <View style={styles.divider} />
           <View style={styles.timeBox}>
             <Text style={styles.timeLabel}>PUNCH OUT</Text>
-            <Text style={styles.timeValue}>{item.outTime}</Text>
-            {item.outTime !== '-' && (
+            <Text style={styles.timeValue}>{item.out_time}</Text>
+            {item.out_time !== '-' && (
               <Text style={styles.locationText}>
                 <Ionicons name="location" size={10} /> {item.location}
               </Text>

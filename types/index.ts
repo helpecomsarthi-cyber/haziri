@@ -3,7 +3,7 @@ export interface Employee {
     name: string;
     phone: string;
     role: string;
-    dailyWage: number;
+    daily_wage: number;
     status: string;
     org_id?: string;
     created_at?: string;
@@ -11,10 +11,10 @@ export interface Employee {
 
 export interface Attendance {
     id: string;
-    employeeId: string;
+    employee_id: string;
     date: string;
-    inTime: string;
-    outTime: string;
+    in_time: string;
+    out_time: string;
     status: 'Present' | 'Absent' | 'Late' | 'Working';
     location: string;
     latitude?: number;
@@ -24,12 +24,12 @@ export interface Attendance {
 
 export interface Payroll {
     id: string;
-    employeeId: string;
+    employee_id: string;
     month: string;
-    presentDays: number;
-    absentDays: number;
-    lateDays: number;
-    totalSalary: number;
+    present_days: number;
+    absent_days: number;
+    late_days: number;
+    total_salary: number;
     status: 'Paid' | 'Pending';
     created_at?: string;
 }
