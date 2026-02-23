@@ -141,10 +141,17 @@ export default function DashboardScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => navigation.navigate('Employees', { autoOpenModal: true })}
+            onPress={() => navigation.navigate('Employees')}
           >
-            <Ionicons name="add-circle" size={24} color="#075E54" />
-            <Text style={styles.actionText}>Add Staff</Text>
+            <Ionicons name="people" size={24} color="#075E54" />
+            <Text style={styles.actionText}>View Staff</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => navigation.navigate('Payroll')}
+          >
+            <Ionicons name="cash" size={24} color="#075E54" />
+            <Text style={styles.actionText}>Payroll</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -291,21 +298,29 @@ const styles = StyleSheet.create({
   },
   actionGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginTop: 10,
   },
   actionBtn: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
     padding: 15,
     borderRadius: 12,
-    width: '30%',
+    width: '48%',
+    marginBottom: 15,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
     borderWidth: 1,
     borderColor: '#eee',
   },
   actionText: {
-    fontSize: 12,
+    fontSize: 14,
+    fontWeight: '600',
     marginTop: 8,
     textAlign: 'center',
     color: '#333',
