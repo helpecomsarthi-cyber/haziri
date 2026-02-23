@@ -35,20 +35,27 @@ export default function EmployeesScreen() {
   };
 
   const handleAddEmployee = async () => {
+    console.log('Attempting to add employee:', { newName, newPhone, newRole, newWage });
+
     if (!newName || !newPhone || !newWage) {
+      console.warn('Validation failed: Some fields are empty');
       Alert.alert('Error', 'Please fill all fields');
       return;
     }
 
     try {
       setLoading(true);
-      await employeeService.addEmployee({
+      console.log('Calling employeeService.addEmployee...');
+
+      const result = await employeeService.addEmployee({
         name: newName,
         phone: newPhone,
         role: newRole,
         dailyWage: parseFloat(newWage),
         status: 'Active'
       });
+
+      console.log('Employee added successfully:', result);
 
       setModalVisible(false);
       setNewName('');
@@ -58,6 +65,7 @@ export default function EmployeesScreen() {
       Alert.alert('Success', 'Staff added successfully!');
       loadEmployees();
     } catch (error: any) {
+      console.error('Failed to add employee:', error);
       Alert.alert('Error', error.message || 'Could not add staff');
       setLoading(false);
     }
