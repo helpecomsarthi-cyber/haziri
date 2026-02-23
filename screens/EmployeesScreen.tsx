@@ -21,6 +21,12 @@ export default function EmployeesScreen() {
     loadEmployees();
   }, []);
 
+  useEffect(() => {
+    if (route.params?.autoOpenModal) {
+      setModalVisible(true);
+    }
+  }, [route.params?.autoOpenModal]);
+
   const loadEmployees = async () => {
     setLoading(true);
     const data = await employeeService.getEmployees();
