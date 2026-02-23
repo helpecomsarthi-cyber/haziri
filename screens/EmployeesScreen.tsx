@@ -4,13 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { employeeService } from '../services/employee.service';
 import { roleService } from '../services/role.service';
-import { Employee, Role } from '../types';
+import { locationService } from '../services/location.service';
+import { Employee, Role, BusinessLocation } from '../types';
 
 export default function EmployeesScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [sites, setSites] = useState<BusinessLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
@@ -21,6 +23,8 @@ export default function EmployeesScreen() {
   const [newWhatsApp, setNewWhatsApp] = useState('');
   const [newRole, setNewRole] = useState('');
   const [newWage, setNewWage] = useState('');
+  const [newAssignedSiteId, setNewAssignedSiteId] = useState<string | null>(null);
+  const [newAllowAnywhere, setNewAllowAnywhere] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -28,12 +32,14 @@ export default function EmployeesScreen() {
 
   const loadData = async () => {
     setLoading(true);
-    const [empData, roleData] = await Promise.all([
+    const [empData, roleData, siteData] = await Promise.all([
       employeeService.getEmployees(),
-      roleService.getRoles()
+      roleService.getRoles(),
+      locationService.getLocations()
     ]);
     setEmployees(empData as Employee[]);
     setRoles(roleData);
+    setSites(siteData as BusinessLocation[]);
     if (roleData.length > 0) {
       setNewRole(roleData[0].name);
     }
@@ -47,6 +53,8 @@ export default function EmployeesScreen() {
     setNewWhatsApp(employee.whatsapp_number || '');
     setNewRole(employee.role);
     setNewWage(employee.daily_wage.toString());
+    setNewAssignedSiteId(employee.assigned_site_id || null);
+    setNewAllowAnywhere(employee.allow_anywhere_checkin || false);
     setModalVisible(true);
   };
 
@@ -55,13 +63,15 @@ export default function EmployeesScreen() {
     setNewName('');
     setNewPhone('');
     setNewWhatsApp('');
-    setNewRole('Staff');
+    setNewRole(roles.length > 0 ? roles[0].name : '');
     setNewWage('');
+    setNewAssignedSiteId(null);
+    setNewAllowAnywhere(false);
   };
 
   const handleSubmit = async () => {
     if (!newName || !newPhone || !newWage) {
-      Alert.alert('Error', 'Please fill all fields');
+      Alert.alert('Error', 'Please fill all required fields (Name, Phone, Wage)');
       return;
     }
 
@@ -73,7 +83,9 @@ export default function EmployeesScreen() {
         whatsapp_number: newWhatsApp,
         role: newRole,
         daily_wage: parseFloat(newWage),
-        status: editingEmployee ? editingEmployee.status : 'Active'
+        status: editingEmployee ? editingEmployee.status : 'Active',
+        assigned_site_id: newAssignedSiteId,
+        allow_anywhere_checkin: newAllowAnywhere
       };
 
       if (editingEmployee) {
@@ -172,7 +184,7 @@ export default function EmployeesScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           refreshing={loading}
-          onRefresh={loadEmployees}
+          onRefresh={loadData}
         />
       )}
 
@@ -255,6 +267,47 @@ export default function EmployeesScreen() {
                     <Text style={styles.emptyRolesText}>No roles found. Add roles in Dashboard {'>'} Manage Roles.</Text>
                   )}
                 </View>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Site Assignment (Location)</Text>
+                <View style={styles.roleOptions}>
+                  <TouchableOpacity
+                    style={[styles.roleChip, !newAssignedSiteId && styles.activeRoleChip]}
+                    onPress={() => { setNewAssignedSiteId(null); setNewAllowAnywhere(false); }}
+                  >
+                    <Text style={[styles.roleChipText, !newAssignedSiteId && styles.activeRoleChipText]}>Any Site</Text>
+                  </TouchableOpacity>
+                  {sites.map((site) => (
+                    <TouchableOpacity
+                      key={site.id}
+                      style={[styles.roleChip, newAssignedSiteId === site.id && styles.activeRoleChip]}
+                      onPress={() => { setNewAssignedSiteId(site.id); setNewAllowAnywhere(false); }}
+                    >
+                      <Text style={[styles.roleChipText, newAssignedSiteId === site.id && styles.activeRoleChipText]}>
+                        {site.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Authority</Text>
+                <TouchableOpacity
+                  style={[styles.permissionToggle, newAllowAnywhere && styles.activePermissionToggle]}
+                  onPress={() => setNewAllowAnywhere(!newAllowAnywhere)}
+                >
+                  <Ionicons
+                    name={newAllowAnywhere ? "checkmark-circle" : "ellipse-outline"}
+                    size={24}
+                    color={newAllowAnywhere ? "#fff" : "#666"}
+                  />
+                  <View style={styles.toggleTextContent}>
+                    <Text style={[styles.toggleTitle, newAllowAnywhere && styles.activeToggleText]}>Allow Check-in Anywhere</Text>
+                    <Text style={[styles.toggleSub, newAllowAnywhere && styles.activeToggleText]}>For Drivers / Field Staff (Geofencing skipped)</Text>
+                  </View>
+                </TouchableOpacity>
               </View>
 
               <TouchableOpacity
@@ -488,5 +541,36 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
     paddingHorizontal: 20,
+  },
+  permissionToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 12,
+    padding: 15,
+    marginTop: 10,
+  },
+  activePermissionToggle: {
+    backgroundColor: '#075E54',
+    borderColor: '#075E54',
+  },
+  toggleTextContent: {
+    marginLeft: 15,
+    flex: 1,
+  },
+  toggleTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  activeToggleText: {
+    color: '#fff',
+  },
+  toggleSub: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
   }
 });

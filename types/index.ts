@@ -6,6 +6,8 @@ export interface Employee {
     role: string;
     daily_wage: number;
     status: string;
+    assigned_site_id?: string;
+    allow_anywhere_checkin?: boolean;
     org_id?: string;
     created_at?: string;
 }

@@ -15,6 +15,8 @@ CREATE TABLE employees (
     role TEXT NOT NULL,
     daily_wage NUMERIC NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'Active',
+    assigned_site_id UUID REFERENCES locations(id),
+    allow_anywhere_checkin BOOLEAN DEFAULT FALSE,
     org_id UUID DEFAULT auth.uid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
