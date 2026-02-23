@@ -2,6 +2,7 @@ export interface Employee {
     id: string;
     name: string;
     phone: string;
+    whatsapp_number?: string;
     role: string;
     daily_wage: number;
     status: string;
@@ -19,6 +20,8 @@ export interface Attendance {
     location: string;
     latitude?: number;
     longitude?: number;
+    distance_meters?: number;
+    verified_location_id?: string;
     created_at?: string;
 }
 

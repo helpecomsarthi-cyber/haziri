@@ -16,6 +16,7 @@ export default function EmployeesScreen() {
   // New Employee Form State
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
+  const [newWhatsApp, setNewWhatsApp] = useState('');
   const [newRole, setNewRole] = useState('Staff');
   const [newWage, setNewWage] = useState('');
 
@@ -40,6 +41,7 @@ export default function EmployeesScreen() {
     setEditingEmployee(employee);
     setNewName(employee.name);
     setNewPhone(employee.phone);
+    setNewWhatsApp(employee.whatsapp_number || '');
     setNewRole(employee.role);
     setNewWage(employee.daily_wage.toString());
     setModalVisible(true);
@@ -49,6 +51,7 @@ export default function EmployeesScreen() {
     setEditingEmployee(null);
     setNewName('');
     setNewPhone('');
+    setNewWhatsApp('');
     setNewRole('Staff');
     setNewWage('');
   };
@@ -64,6 +67,7 @@ export default function EmployeesScreen() {
       const employeeData = {
         name: newName,
         phone: newPhone,
+        whatsapp_number: newWhatsApp,
         role: newRole,
         daily_wage: parseFloat(newWage),
         status: editingEmployee ? editingEmployee.status : 'Active'
@@ -197,7 +201,18 @@ export default function EmployeesScreen() {
               </View>
 
               <View style={styles.formGroup}>
-                <Text style={styles.label}>WhatsApp Number</Text>
+                <Text style={styles.label}>WhatsApp Number (for Bot)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="91XXXXXXXXXX"
+                  value={newWhatsApp}
+                  onChangeText={setNewWhatsApp}
+                  keyboardType="phone-pad"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Calling Phone Number</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Enter 10-digit number"
