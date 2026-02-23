@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { employeeService } from '../services/employee.service';
-import { Employee } from '../types';
+import { roleService } from '../services/role.service';
+import { Employee, Role } from '../types';
 
 export default function EmployeesScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
@@ -17,23 +19,24 @@ export default function EmployeesScreen() {
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newWhatsApp, setNewWhatsApp] = useState('');
-  const [newRole, setNewRole] = useState('Staff');
+  const [newRole, setNewRole] = useState('');
   const [newWage, setNewWage] = useState('');
 
   useEffect(() => {
-    loadEmployees();
+    loadData();
   }, []);
 
-  useEffect(() => {
-    if (route.params?.autoOpenModal) {
-      setModalVisible(true);
-    }
-  }, [route.params?.autoOpenModal]);
-
-  const loadEmployees = async () => {
+  const loadData = async () => {
     setLoading(true);
-    const data = await employeeService.getEmployees();
-    setEmployees(data as Employee[]);
+    const [empData, roleData] = await Promise.all([
+      employeeService.getEmployees(),
+      roleService.getRoles()
+    ]);
+    setEmployees(empData as Employee[]);
+    setRoles(roleData);
+    if (roleData.length > 0) {
+      setNewRole(roleData[0].name);
+    }
     setLoading(false);
   };
 
@@ -83,7 +86,7 @@ export default function EmployeesScreen() {
 
       setModalVisible(false);
       resetForm();
-      loadEmployees();
+      loadData();
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Action failed');
     } finally {
@@ -236,17 +239,21 @@ export default function EmployeesScreen() {
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Role</Text>
                 <View style={styles.roleOptions}>
-                  {['Staff', 'Supervisor', 'Manager'].map((role) => (
-                    <TouchableOpacity
-                      key={role}
-                      style={[styles.roleChip, newRole === role && styles.activeRoleChip]}
-                      onPress={() => setNewRole(role)}
-                    >
-                      <Text style={[styles.roleChipText, newRole === role && styles.activeRoleChipText]}>
-                        {role}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {roles.length > 0 ? (
+                    roles.map((role) => (
+                      <TouchableOpacity
+                        key={role.id}
+                        style={[styles.roleChip, newRole === role.name && styles.activeRoleChip]}
+                        onPress={() => setNewRole(role.name)}
+                      >
+                        <Text style={[styles.roleChipText, newRole === role.name && styles.activeRoleChipText]}>
+                          {role.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyRolesText}>No roles found. Add roles in Dashboard {'>'} Manage Roles.</Text>
+                  )}
                 </View>
               </View>
 
@@ -472,5 +479,14 @@ const styles = StyleSheet.create({
   },
   disabledBtn: {
     backgroundColor: '#ccc',
+  },
+  emptyRolesText: {
+    color: '#666',
+    fontSize: 14,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+    paddingHorizontal: 20,
   }
 });

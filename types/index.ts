@@ -46,3 +46,10 @@ export interface BusinessLocation {
     org_id?: string;
     created_at?: string;
 }
+
+export interface Role {
+    id: string;
+    name: string;
+    org_id?: string;
+    created_at?: string;
+}

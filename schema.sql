@@ -11,6 +11,7 @@ CREATE TABLE employees (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL,
     phone TEXT NOT NULL,
+    whatsapp_number TEXT,
     role TEXT NOT NULL,
     daily_wage NUMERIC NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'Active',
@@ -29,6 +30,8 @@ CREATE TABLE attendance (
     location TEXT,
     latitude DOUBLE PRECISION,
     longitude DOUBLE PRECISION,
+    distance_meters NUMERIC,
+    verified_location_id UUID REFERENCES locations(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -117,4 +120,31 @@ USING (org_id = auth.uid());
 
 CREATE POLICY "Users can delete their own org locations"
 ON locations FOR DELETE
+USING (org_id = auth.uid());
+
+-- 8. Roles Table
+CREATE TABLE roles (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    org_id UUID DEFAULT auth.uid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(name, org_id)
+);
+
+ALTER TABLE roles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own org roles"
+ON roles FOR SELECT
+USING (org_id = auth.uid());
+
+CREATE POLICY "Users can insert their own org roles"
+ON roles FOR INSERT
+WITH CHECK (org_id = auth.uid());
+
+CREATE POLICY "Users can update their own org roles"
+ON roles FOR UPDATE
+USING (org_id = auth.uid());
+
+CREATE POLICY "Users can delete their own org roles"
+ON roles FOR DELETE
 USING (org_id = auth.uid());

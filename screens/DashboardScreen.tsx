@@ -127,6 +127,13 @@ export default function DashboardScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}
+            onPress={() => navigation.navigate('Roles')}
+          >
+            <Ionicons name="briefcase" size={24} color="#075E54" />
+            <Text style={styles.actionText}>Manage Roles</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionBtn}
             onPress={() => navigation.navigate('Locations')}
           >
             <Ionicons name="map" size={24} color="#075E54" />
