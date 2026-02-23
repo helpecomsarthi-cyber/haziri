@@ -13,15 +13,18 @@ export interface Employee {
 
 export const employeeService = {
     async getEmployees() {
-        // Falls back to mock data if supabase is not configured or fails
         try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return mockEmployees;
+
             const { data, error } = await supabase
                 .from('employees')
                 .select('*')
+                .eq('org_id', user.id)
                 .order('name');
 
             if (error) throw error;
-            return data || mockEmployees;
+            return data && data.length > 0 ? data : mockEmployees;
         } catch (e) {
             console.warn('Supabase fetch failed, using mock data:', e);
             return mockEmployees;
@@ -29,9 +32,12 @@ export const employeeService = {
     },
 
     async addEmployee(employee: Omit<Employee, 'id'>) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
         const { data, error } = await supabase
             .from('employees')
-            .insert([employee])
+            .insert([{ ...employee, org_id: user.id }])
             .select()
             .single();
 

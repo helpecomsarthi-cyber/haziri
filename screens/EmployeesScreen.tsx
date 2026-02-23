@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { employeeService } from '../services/employee.service';
 import { Employee } from '../types';
@@ -7,6 +7,13 @@ import { Employee } from '../types';
 export default function EmployeesScreen() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // New Employee Form State
+  const [newName, setNewName] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [newRole, setNewRole] = useState('Staff');
+  const [newWage, setNewWage] = useState('');
 
   useEffect(() => {
     loadEmployees();
@@ -17,6 +24,35 @@ export default function EmployeesScreen() {
     const data = await employeeService.getEmployees();
     setEmployees(data as Employee[]);
     setLoading(false);
+  };
+
+  const handleAddEmployee = async () => {
+    if (!newName || !newPhone || !newWage) {
+      Alert.alert('Error', 'Please fill all fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await employeeService.addEmployee({
+        name: newName,
+        phone: newPhone,
+        role: newRole,
+        dailyWage: parseFloat(newWage),
+        status: 'Active'
+      });
+
+      setModalVisible(false);
+      setNewName('');
+      setNewPhone('');
+      setNewWage('');
+
+      Alert.alert('Success', 'Staff added successfully!');
+      loadEmployees();
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Could not add staff');
+      setLoading(false);
+    }
   };
 
   const renderItem = ({ item }: { item: Employee }) => (
@@ -67,22 +103,105 @@ export default function EmployeesScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <Text style={styles.searchText}>Search staff...</Text>
         </View>
-        <TouchableOpacity style={styles.addBtn} onPress={loadEmployees}>
+        <TouchableOpacity style={styles.addBtn} onPress={() => setModalVisible(true)}>
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-      {loading ? (
+
+      {loading && employees.length === 0 ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#075E54" />
         </View>
       ) : (
         <FlatList
           data={employees}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.id || Math.random().toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
+          refreshing={loading}
+          onRefresh={loadEmployees}
         />
       )}
+
+      {/* Add Staff Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add New Staff</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView>
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Full Name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter name"
+                  value={newName}
+                  onChangeText={setNewName}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>WhatsApp Number</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter 10-digit number"
+                  value={newPhone}
+                  onChangeText={setNewPhone}
+                  keyboardType="phone-pad"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Daily Wage (₹)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter amount"
+                  value={newWage}
+                  onChangeText={setNewWage}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Role</Text>
+                <View style={styles.roleOptions}>
+                  {['Staff', 'Supervisor', 'Manager'].map((role) => (
+                    <TouchableOpacity
+                      key={role}
+                      style={[styles.roleChip, newRole === role && styles.activeRoleChip]}
+                      onPress={() => setNewRole(role)}
+                    >
+                      <Text style={[styles.roleChipText, newRole === role && styles.activeRoleChipText]}>
+                        {role}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitBtn, loading && styles.disabledBtn]}
+                onPress={handleAddEmployee}
+                disabled={loading}
+              >
+                <Text style={styles.submitBtnText}>
+                  {loading ? 'Adding...' : 'Add Employee'}
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -209,5 +328,88 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     color: '#333',
     fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#075E54',
+  },
+  formGroup: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+    fontWeight: '500',
+  },
+  input: {
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+  },
+  roleOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 5,
+  },
+  roleChip: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  activeRoleChip: {
+    backgroundColor: '#075E54',
+    borderColor: '#075E54',
+  },
+  roleChipText: {
+    color: '#666',
+    fontSize: 14,
+  },
+  activeRoleChipText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  submitBtn: {
+    backgroundColor: '#075E54',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  submitBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  disabledBtn: {
+    backgroundColor: '#ccc',
   }
 });
