@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, ScrollView, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { employeeService } from '../services/employee.service';
 import { Employee } from '../types';
 
 export default function EmployeesScreen() {
   const route = useRoute<any>();
+  const navigation = useNavigation<any>();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -145,6 +146,9 @@ export default function EmployeesScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <Text style={styles.searchText}>Search staff...</Text>
         </View>
+        <TouchableOpacity style={[styles.addBtn, { backgroundColor: '#E8F5E9', marginRight: 10 }]} onPress={() => navigation.navigate('Locations')}>
+          <Ionicons name="location" size={20} color="#075E54" />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.addBtn} onPress={() => { resetForm(); setModalVisible(true); }}>
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>

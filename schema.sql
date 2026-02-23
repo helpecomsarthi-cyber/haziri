@@ -45,6 +45,17 @@ CREATE TABLE payroll (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 4. Locations Table
+CREATE TABLE locations (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    address TEXT,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    org_id UUID DEFAULT auth.uid(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Enable RLS (Row Level Security)
 ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
@@ -88,3 +99,22 @@ USING (EXISTS (
     WHERE employees.id = payroll.employee_id 
     AND employees.org_id = auth.uid()
 ));
+
+-- 7. Location Policies
+ALTER TABLE locations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own org locations"
+ON locations FOR SELECT
+USING (org_id = auth.uid());
+
+CREATE POLICY "Users can insert their own org locations"
+ON locations FOR INSERT
+WITH CHECK (org_id = auth.uid());
+
+CREATE POLICY "Users can update their own org locations"
+ON locations FOR UPDATE
+USING (org_id = auth.uid());
+
+CREATE POLICY "Users can delete their own org locations"
+ON locations FOR DELETE
+USING (org_id = auth.uid());

@@ -14,6 +14,7 @@ import EmployeesScreen from './screens/EmployeesScreen';
 import AttendanceScreen from './screens/AttendanceScreen';
 import PayrollScreen from './screens/PayrollScreen';
 import LoginScreen from './screens/LoginScreen';
+import LocationsScreen from './screens/LocationsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -74,7 +75,10 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {session && session.user ? (
-            <Stack.Screen name="Main" component={AppTabs} />
+            <Stack.Group>
+              <Stack.Screen name="Main" component={AppTabs} />
+              <Stack.Screen name="Locations" component={LocationsScreen} options={{ headerShown: true, title: 'Manage Sites', headerStyle: { backgroundColor: '#075E54' }, headerTintColor: '#fff' }} />
+            </Stack.Group>
           ) : (
             <Stack.Screen name="Login" component={LoginScreen} />
           )}

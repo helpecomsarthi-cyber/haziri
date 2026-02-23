@@ -127,10 +127,10 @@ export default function DashboardScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => Alert.alert('Feature Active', 'Detailed reports will be sent to your registered email.')}
+            onPress={() => navigation.navigate('Locations')}
           >
-            <Ionicons name="document-text" size={24} color="#075E54" />
-            <Text style={styles.actionText}>Daily Report</Text>
+            <Ionicons name="map" size={24} color="#075E54" />
+            <Text style={styles.actionText}>Manage Sites</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}

@@ -33,3 +33,13 @@ export interface Payroll {
     status: 'Paid' | 'Pending';
     created_at?: string;
 }
+
+export interface BusinessLocation {
+    id: string;
+    name: string;
+    address?: string;
+    latitude?: number;
+    longitude?: number;
+    org_id?: string;
+    created_at?: string;
+}
