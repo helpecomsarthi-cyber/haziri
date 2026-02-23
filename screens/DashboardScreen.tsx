@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { attendanceService } from '../services/attendance.service';
 import { employeeService } from '../services/employee.service';
 import { supabase } from '../lib/supabase';
 import { Employee, Attendance } from '../types';
 
 export default function DashboardScreen() {
+  const navigation = useNavigation<any>();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +83,7 @@ export default function DashboardScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Recent WhatsApp Punches</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Attendance')}>
             <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
         </View>
@@ -116,15 +117,24 @@ export default function DashboardScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionGrid}>
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => Alert.alert('Coming Soon', 'WhatsApp Broadcast feature will be available in the next update!')}
+          >
             <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
             <Text style={styles.actionText}>Send Broadcast</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => Alert.alert('Feature Active', 'Detailed reports will be sent to your registered email.')}
+          >
             <Ionicons name="document-text" size={24} color="#075E54" />
             <Text style={styles.actionText}>Daily Report</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => navigation.navigate('Employees', { autoOpenModal: true })}
+          >
             <Ionicons name="add-circle" size={24} color="#075E54" />
             <Text style={styles.actionText}>Add Staff</Text>
           </TouchableOpacity>

@@ -1,6 +1,11 @@
 -- Hajiri Admin SaaS Database Schema
 -- Run this in your Supabase SQL Editor
 
+-- 0. Clean Wipe (Optional: Remove if you want to keep existing data)
+DROP TABLE IF EXISTS payroll CASCADE;
+DROP TABLE IF EXISTS attendance CASCADE;
+DROP TABLE IF EXISTS employees CASCADE;
+
 -- 1. Employees Table
 CREATE TABLE employees (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -9,7 +14,7 @@ CREATE TABLE employees (
     role TEXT NOT NULL,
     dailyWage NUMERIC NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'Active',
-    org_id UUID,
+    org_id UUID DEFAULT auth.uid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -40,17 +45,46 @@ CREATE TABLE payroll (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Enable RLS (Row Level Security) - Recommended for Production
+-- Enable RLS (Row Level Security)
 ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payroll ENABLE ROW LEVEL SECURITY;
 
--- Create basic policies (Assuming authenticated users can see everything for now)
-CREATE POLICY "Allow public read access" ON employees FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access" ON employees FOR INSERT WITH CHECK (true);
+-- 4. Employees Policies
+CREATE POLICY "Users can view their own org employees" 
+ON employees FOR SELECT 
+USING (auth.uid() = org_id);
 
-CREATE POLICY "Allow public read access" ON attendance FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access" ON attendance FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can insert employees for their own org" 
+ON employees FOR INSERT 
+WITH CHECK (auth.uid() = org_id);
 
-CREATE POLICY "Allow public read access" ON payroll FOR SELECT USING (true);
-CREATE POLICY "Allow public update access" ON payroll FOR UPDATE USING (true);
+CREATE POLICY "Users can update their own org employees" 
+ON employees FOR UPDATE 
+USING (auth.uid() = org_id);
+
+-- 5. Attendance Policies
+CREATE POLICY "Users can view their own org attendance" 
+ON attendance FOR SELECT 
+USING (EXISTS (
+    SELECT 1 FROM employees 
+    WHERE employees.id = attendance.employeeId 
+    AND employees.org_id = auth.uid()
+));
+
+CREATE POLICY "Users can insert attendance for their own org" 
+ON attendance FOR INSERT 
+WITH CHECK (EXISTS (
+    SELECT 1 FROM employees 
+    WHERE employees.id = attendance.employeeId 
+    AND employees.org_id = auth.uid()
+));
+
+-- 6. Payroll Policies
+CREATE POLICY "Users can view their own org payroll" 
+ON payroll FOR SELECT 
+USING (EXISTS (
+    SELECT 1 FROM employees 
+    WHERE employees.id = payroll.employeeId 
+    AND employees.org_id = auth.uid()
+));

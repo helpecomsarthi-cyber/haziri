@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { payrollService } from '../services/payroll.service';
 import { mockEmployees } from '../data/mockData';
@@ -52,10 +52,16 @@ export default function PayrollScreen() {
             <Text style={styles.statusText}>{item.status}</Text>
           </View>
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.actionBtn}>
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => Alert.alert('Payroll Report', `Generating detailed report for ${emp?.name}...`)}
+            >
               <Ionicons name="document-text-outline" size={20} color="#075E54" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn}>
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => Alert.alert('WhatsApp Notification', `Sending salary slip to ${emp?.name} on WhatsApp...`)}
+            >
               <Ionicons name="logo-whatsapp" size={20} color="#25D366" />
             </TouchableOpacity>
           </View>
@@ -71,7 +77,10 @@ export default function PayrollScreen() {
         <Text style={styles.summaryAmount}>₹{totalPayroll.toLocaleString()}</Text>
         <Text style={styles.summarySubtitle}>Total Estimated Payout</Text>
 
-        <TouchableOpacity style={styles.generateBtn}>
+        <TouchableOpacity
+          style={styles.generateBtn}
+          onPress={() => Alert.alert('Generating Slips', 'Salary slips for October 2023 are being generated and will be sent to WhatsApp.')}
+        >
           <Text style={styles.generateBtnText}>Generate Salary Slips</Text>
         </TouchableOpacity>
       </View>

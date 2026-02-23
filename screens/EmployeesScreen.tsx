@@ -1,10 +1,14 @@
+```
+import React, { useState, useEffect } from 'react';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
 import { employeeService } from '../services/employee.service';
 import { Employee } from '../types';
 
 export default function EmployeesScreen() {
+  const route = useRoute<any>();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);

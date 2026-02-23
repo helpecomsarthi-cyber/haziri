@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { attendanceService } from '../services/attendance.service';
 import { mockEmployees } from '../data/mockData';
@@ -73,9 +73,13 @@ export default function AttendanceScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.dateSelector}>
-        <Ionicons name="chevron-back" size={24} color="#075E54" />
+        <TouchableOpacity onPress={() => Alert.alert('History', 'Calendar view for past attendance is coming in the next update!')}>
+          <Ionicons name="chevron-back" size={24} color="#075E54" />
+        </TouchableOpacity>
         <Text style={styles.dateText}>Today, {new Date().toLocaleDateString()}</Text>
-        <Ionicons name="chevron-forward" size={24} color="#ccc" />
+        <TouchableOpacity onPress={() => Alert.alert('Future', 'You cannot view future attendance!')}>
+          <Ionicons name="chevron-forward" size={24} color="#ccc" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.filterContainer}>
