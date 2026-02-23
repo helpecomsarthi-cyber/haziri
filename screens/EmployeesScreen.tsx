@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, ScrollView, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import { employeeService } from '../services/employee.service';
@@ -100,11 +100,22 @@ export default function EmployeesScreen() {
       </View>
 
       <View style={styles.cardFooter}>
-        <TouchableOpacity style={styles.actionBtn}>
+        <TouchableOpacity
+          style={styles.actionBtn}
+          onPress={() => Alert.alert('Edit Staff', `Editing functionality for ${item.name} is coming in the next update!`)}
+        >
           <Ionicons name="create-outline" size={18} color="#075E54" />
           <Text style={styles.actionText}>Edit</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}>
+        <TouchableOpacity
+          style={styles.actionBtn}
+          onPress={() => {
+            const url = `whatsapp://send?phone=${item.phone}&text=Namaste ${item.name}`;
+            Linking.openURL(url).catch(() => {
+              Alert.alert('Error', 'WhatsApp is not installed on your device');
+            });
+          }}
+        >
           <Ionicons name="chatbubble-outline" size={18} color="#25D366" />
           <Text style={styles.actionText}>Message</Text>
         </TouchableOpacity>
