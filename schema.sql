@@ -34,6 +34,7 @@ CREATE TABLE attendance (
     longitude DOUBLE PRECISION,
     distance_meters NUMERIC,
     verified_location_id UUID REFERENCES locations(id),
+    org_id UUID DEFAULT auth.uid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -47,6 +48,7 @@ CREATE TABLE payroll (
     late_days INTEGER DEFAULT 0,
     total_salary NUMERIC DEFAULT 0,
     status TEXT DEFAULT 'Pending', -- Paid, Pending
+    org_id UUID DEFAULT auth.uid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -82,19 +84,15 @@ USING (auth.uid() = org_id);
 -- 5. Attendance Policies
 CREATE POLICY "Users can view their own org attendance" 
 ON attendance FOR SELECT 
-USING (EXISTS (
-    SELECT 1 FROM employees 
-    WHERE employees.id = attendance.employee_id 
-    AND employees.org_id = auth.uid()
-));
+USING (auth.uid() = org_id);
 
 CREATE POLICY "Users can insert attendance for their own org" 
 ON attendance FOR INSERT 
-WITH CHECK (EXISTS (
-    SELECT 1 FROM employees 
-    WHERE employees.id = attendance.employee_id 
-    AND employees.org_id = auth.uid()
-));
+WITH CHECK (auth.uid() = org_id);
+
+CREATE POLICY "Users can update their own org attendance" 
+ON attendance FOR UPDATE 
+USING (auth.uid() = org_id);
 
 -- 6. Payroll Policies
 CREATE POLICY "Users can view their own org payroll" 

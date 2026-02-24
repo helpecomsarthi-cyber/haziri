@@ -24,6 +24,7 @@ export interface Attendance {
     longitude?: number;
     distance_meters?: number;
     verified_location_id?: string;
+    org_id?: string;
     created_at?: string;
 }
 
@@ -36,6 +37,7 @@ export interface Payroll {
     late_days: number;
     total_salary: number;
     status: 'Paid' | 'Pending';
+    org_id?: string;
     created_at?: string;
 }
 
