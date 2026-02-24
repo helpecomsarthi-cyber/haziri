@@ -97,11 +97,15 @@ USING (auth.uid() = org_id);
 -- 6. Payroll Policies
 CREATE POLICY "Users can view their own org payroll" 
 ON payroll FOR SELECT 
-USING (EXISTS (
-    SELECT 1 FROM employees 
-    WHERE employees.id = payroll.employee_id 
-    AND employees.org_id = auth.uid()
-));
+USING (auth.uid() = org_id);
+
+CREATE POLICY "Users can insert payroll for their own org" 
+ON payroll FOR INSERT 
+WITH CHECK (auth.uid() = org_id);
+
+CREATE POLICY "Users can update their own org payroll" 
+ON payroll FOR UPDATE 
+USING (auth.uid() = org_id);
 
 -- 7. Location Policies
 ALTER TABLE locations ENABLE ROW LEVEL SECURITY;
